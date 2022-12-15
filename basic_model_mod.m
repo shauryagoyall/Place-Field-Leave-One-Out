@@ -4,7 +4,7 @@
 
 %modified to do leave one by by Shaurya GOyal, 2022
 
-number_of_place_cells=60;
+number_of_place_cells=30;
 
 t_end = 30;
 
@@ -80,6 +80,16 @@ position_bins=linspace(0,1,number_of_place_cells);
 
 [position_actual,estimated_position_time_actual,estimated_position_interp_actual]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id,position_bins);
 
+figure;
+imagesc(estimated_position_time,position_bins,position_actual)
+a=colormap(bone);
+colormap(flipud(a));
+hold on
+axis xy
+plot(t,estimated_position_interp_actual,'r','LineWidth',2)
+colorbar
+
+%%
 
 for s = 1:number_of_place_cells
 
@@ -102,15 +112,15 @@ out.Bayes_probability=estimated_position_interp;
 
 %%%%%%%%%%FIGURE 2: Bayesian decoding
 figure;
-%imagesc(estimated_position_time,position_bins,position)
+% %imagesc(estimated_position_time,position_bins,position)
 imagesc(estimated_position_time,position_bins,position)
-%a=colormap(bone);
-%colormap(flipud(a));
+a=colormap(bone);
+colormap(flipud(a));
 axis xy
 hold on
-%plot(t,estimated_position_interp_actual,'r','LineWidth',2)
+% plot(t,estimated_position_interp_actual,'r','LineWidth',2)
 %plot(t,estimated_position_interp,'g--')
-%plot(t,estimated_position_interp,'g--','LineWidth',1)
+plot(t,estimated_position_interp,'g','LineWidth',2)
 title(['Bayesian decoding- Neuron' num2str(s) ' left out'])
 ylabel('Position (normalized)')
 xlabel('Time(s)')
