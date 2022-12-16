@@ -2,7 +2,11 @@
 %with Bayesian decoding
 %written by Daniel Bendor, 2018
 
-%modified to do leave one by by Shaurya GOyal, 2022
+%modified to do leave one by by Shaurya Goyal, 2022
+
+close all;
+clear;
+clc;
 
 number_of_place_cells=30;
 
@@ -81,7 +85,7 @@ position_bins=linspace(0,1,number_of_place_cells);
 [position_actual,estimated_position_time_actual,estimated_position_interp_actual]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id,position_bins);
 
 figure;
-imagesc(estimated_position_time,position_bins,position_actual)
+imagesc(estimated_position_time_actual,position_bins,position_actual)
 a=colormap(bone);
 colormap(flipud(a));
 hold on
@@ -125,7 +129,12 @@ title(['Bayesian decoding- Neuron' num2str(s) ' left out'])
 ylabel('Position (normalized)')
 xlabel('Time(s)')
 colorbar
+%spike_index = find(spike_id==s)
 
+%%plot the neurons that are skipped here
+left_out_spike_times = spike_times(find(spike_id==s));
+left_out_spike_position = position_bins(s);
+plot(left_out_spike_times,left_out_spike_position,'r.','linewidth',1000);
 %%plot the neurons we are skipping here and then get a sanity check ?
 
 
