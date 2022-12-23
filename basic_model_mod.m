@@ -9,7 +9,6 @@ clear;
 clc;
 
 number_of_place_cells=30;
-
 t_end = 30;
 
 t=0:0.01:t_end;
@@ -41,7 +40,7 @@ out.spike_id=spike_id;
 
 figure
 ax=[];
-ax(1)=subplot(5,1,1);
+ax(1)=subplot(4,1,1);
 plot(t,x,'b')
 hold on
 title('animal behaviour')
@@ -49,7 +48,7 @@ ylabel('position (normalized)')
 xlabel('time(s)')
 
 
-subplot(5,1,2);
+subplot(4,1,2);
 hold on
 for j=1:number_of_place_cells
     plot(place_field(j).x,place_field(j).rate);
@@ -58,7 +57,7 @@ title('place fields')
 xlabel('position (normalized)')
 ylabel('rate(Hz)')
 
-subplot(5,1,3);
+subplot(4,1,3);
 hold on
 for j=1:number_of_place_cells
     plot(x_bins,place_field(j).calculated)
@@ -69,7 +68,7 @@ ylabel('rate(Hz)')
 
 %ax=[];
 %ax(1)=subplot(5,1,4);
-subplot(5,1,4);
+subplot(4,1,4);
 raster_plot(out.spike_times,out.spike_id,'b')
 title('place cell activity')
 ylabel('place cell id')
@@ -103,8 +102,9 @@ spike_id_leave_one = spike_id;
 spike_id_leave_one(spike_id==s)= "ignore" ;
 
 
+%estimated_position is the non interpolated positions that were estimated
 
-[position,estimated_position_time,estimated_position_interp]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id_leave_one,position_bins);
+[position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id_leave_one,position_bins);
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -138,9 +138,51 @@ plot(left_out_spike_times,left_out_spike_position,'r.','linewidth',1000);
 %%plot the neurons we are skipping here and then get a sanity check ?
 
 
+%% Calculating the place field again
+
+%x axis is [0 to 0.1), [0.1 to 0.2), ... [29.9 to 30.0)
+
+spikes_in_time_bin = zeros(1,length(estimated_position_time)) ;
+
+for i=1:length(left_out_spike_times) %for each spike time, find the interval it is between and add 1 to the number of spikes in that interval bin
+    for j=1:length(estimated_position_time)
+        if left_out_spike_times(i) >= estimated_position_time(j)-0.05 & left_out_spike_times(i) <estimated_position_time(j)+0.05 
+            spikes_in_time_bin(j) = spikes_in_time_bin(j) + 1 ;
+        end
+    end
+end
 %linkaxes(ax,'x');
+spikes_in_position_bin = zeros(1, length(position_bins));
+spike_index = find(spikes_in_time_bin ~=0);
+for i=1:length(spike_index)
+    position_index = find( estimated_position(spike_index(i)) == position_bins     );
+    spikes_in_position_bin(position_index) = spikes_in_position_bin(position_index) + 1;
 end
 
+time_in_position_bin = zeros(1, length(position_bins));
+for i = 1:length(estimated_position)
+    position_index = find(position_bins==estimated_position(i));
+    time_in_position_bin(position_index) = time_in_position_bin(position_index) + 1;
+end
+
+%% Spikes in a position bin
+figure;
+subplot(2,1,1);
+bar(position_bins,spikes_in_position_bin)
+xticks(position_bins)
+xlabel("Estimated Position")
+ylabel("Number of Spikes")
+title("Number of spikes in a position bin")
+
+%% Time in a position bin
+subplot(2,1,2);
+bar(position_bins,time_in_position_bin)
+xticks(position_bins)
+xlabel("Estimated Position")
+ylabel("Time spent")
+title("Time in a position bin")
+
+end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%Functions
 
@@ -159,7 +201,7 @@ end
     end
 
 %Bayesian decoding 
-    function [position,estimated_position_time,estimated_position_interp]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id,position_bins)
+function [position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_field,spike_times,spike_id,position_bins)
     %disp(length(t0))    
     
         for j=1:length(t0)
