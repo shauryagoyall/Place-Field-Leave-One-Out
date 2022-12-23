@@ -94,7 +94,7 @@ colorbar
 
 %%
 
-for s = 1:number_of_place_cells
+for s = 15:number_of_place_cells
 
 %place_field_leave_one = place_field;
 %place_field_leave_one(s) =[];
@@ -167,7 +167,7 @@ end
 
 %% Spikes in a position bin
 figure;
-subplot(2,1,1);
+subplot(3,1,1);
 bar(position_bins,spikes_in_position_bin)
 xticks(position_bins)
 xlabel("Estimated Position")
@@ -175,13 +175,23 @@ ylabel("Number of Spikes")
 title("Number of spikes in a position bin")
 
 %% Time in a position bin
-subplot(2,1,2);
+subplot(3,1,2);
 bar(position_bins,time_in_position_bin)
 xticks(position_bins)
 xlabel("Estimated Position")
 ylabel("Time spent")
 title("Time in a position bin")
 
+%% Place Field
+for i=1:length(position_bins)
+    frequency(i) = 10*spikes_in_position_bin(i)/time_in_position_bin(i); %10 as time interval is 0.1s
+end
+subplot(3,1,3);
+plot(position_bins,frequency)
+xticks(position_bins)
+xlabel("Estimated Position")
+ylabel("Firing Frequency")
+title("Estimated Place field")
 end
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%Functions
