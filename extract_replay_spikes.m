@@ -20,9 +20,7 @@ good_place_cells=place_fields_BAYESIAN.good_place_cells;
 
 for track_id=1:2
 
-    for j=1:length(place_fields_BAYESIAN.track(track_id).raw) %number of place cells on track
-        place_fields{j}=place_fields_BAYESIAN.track(track_id).raw(j);
-    end
+    
     for j=1:length(significant_replay_events.track(track_id).spikes) %number of replay events
       
         if significant_replay_events.track(track_id).event_times(j)>POST_start & significant_replay_events.track(track_id).event_times(j)<POST_end   %only analyze replay during POST sleep
@@ -48,39 +46,26 @@ for track_id=1:2
                     t0 = significant_replay_events.track(track_id).event_times(j)-.1:bin_width:significant_replay_events.track(track_id).event_times(j)+.1;
                     position_bins=place_fields_BAYESIAN.track(track_id).x_bin_centres; %20 from 0 to 200
 %                     %position_bins=linspace(0,1,length(good_place_cells));
-%                   
-%                     [position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_fields(place_fields_BAYESIAN.track(1).good_cells),event_spike_times,event_spike_id,position_bins,good_place_cells);
-%                     %place_fields(:,good_place_cells)
-%                     %%%%%%%%%%FIGURE 2: Bayesian decoding
-%                     figure;
-%                     % %imagesc(estimated_position_time,position_bins,position)
-%                     imagesc(estimated_position_time,position_bins,position)
-%                     a=colormap(bone);
-%                     colormap(flipud(a));
-%                     axis xy
-%                     hold on
-%                     % plot(t,estimated_position_interp_actual,'r','LineWidth',2)
-%                     plot(t0,estimated_position,'r','LineWidth',2)
-%                     %plot(t,estimated_position_interp,'r','LineWidth',2)
-%                     title(['Bayesian decoding- Neuron' num2str(left_spike_id) ' left out- only good'])
-%                     ylabel('Position (normalized)')
-%                     xlabel('Time(s)')
-%                     
-%                     colorbar
                     
-                    [position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_fields(:,good_place_cells),event_spike_times,event_spike_id,position_bins,good_place_cells);
-                    %
-                    %%%%%%%%%%FIGURE 2: Bayesian decoding
+                    decoded=calculate_estimated_position(t,t0,bin_width,place_fields_BAYESIAN,event_spike_times,event_spike_id,position_bins,good_place_cells);
+                    %place_fields(:,good_place_cells)
+                    
+                    for track_num=1:2
+%                         for j=1:length(place_fields_BAYESIAN.track(track_id).raw) %number of place cells on track
+%                             place_fields{j}=place_fields_BAYESIAN.track(track_num).raw(j);
+%                         end
+                        %%%%%%%%%%FIGURE 2: Bayesian decoding
+                    place_fields=decoded(track_num).place_fields;
                     figure;
 
                     % %imagesc(estimated_position_time,position_bins,position)
-                    imagesc(estimated_position_time,position_bins,position)
+                    imagesc(decoded(track_num).estimated_position_time,position_bins,decoded(track_num).position)
                     a=colormap(bone);
                     colormap(flipud(a));
                     axis xy
                     hold on
                     % plot(t,estimated_position_interp_actual,'r','LineWidth',2)
-                    plot(t0,estimated_position,'r','LineWidth',2)
+                    plot(t0,decoded(track_num).estimated_position,'r','LineWidth',2)
                     %plot(t,estimated_position_interp,'r','LineWidth',2)
                     title(['Bayesian decoding- Neuron' num2str(left_spike_id) ' left out all neruon'])
                     ylabel('Position (normalized)')
@@ -93,7 +78,7 @@ for track_id=1:2
                     subplot(1 ,2 ,1);
                     x_ind = [];
                     for i = 1:length(event_spike_id)
-                        if ismember(event_spike_id(i),place_fields_BAYESIAN.track(1).good_cells)
+                        if ismember(event_spike_id(i),place_fields_BAYESIAN.track(track_num).good_cells)
                             x_ind = cat(2,x_ind,place_fields{1,event_spike_id(i)}{1,1}');
                         end
                     end
@@ -110,13 +95,14 @@ for track_id=1:2
                     imagesc(flipud(mat));
                     colormap(hot);
                     %ylabel([0:2:20])
-                     title("All in event")
+                    title("All in event")
                    
                     %%plot the neurons that are skipped here to get a sanity check
                     %left_out_spike_times = cell_spike_times;
                     %left_out_spike_position = position_bins(left_spike_id);
                     %plot(left_out_spike_times,left_out_spike_position,'r.','linewidth',1000);                      
-                end
+                    end
+               end
             end
         end
     end
