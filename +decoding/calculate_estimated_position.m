@@ -1,23 +1,20 @@
 %Bayesian decoding 
 %function [position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells)
-function decoded=calculate_estimated_position(t,t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells)
-    %disp(length(t0))    
+function decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells)
+    
   for track_id = 1:2
-        
-        %%%% this can be optimized for faster%%%%%%%%%%5
         for j=1:length(place_fields_BAYESIAN.track(track_id).raw) %number of place cells on track
             decoded(track_id).place_fields{j}=place_fields_BAYESIAN.track(track_id).raw(j);
         end
       place_fields(track_id,:)=decoded(track_id).place_fields(:,good_place_cells);   
   end    
-        %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%5
+        
         
   for j=1:length(t0)
             for track_id = 1:2
                 temp_position(track_id,:)=reconstruct(t0(j),bin_width,place_fields(track_id,:),spike_times,spike_id,position_bins,good_place_cells)';
             end
             temp_position = renormalize(temp_position, position_bins);
- 
             for track_id = 1:2
                 decoded(track_id).position(:,j)=temp_position(track_id,:);
             end
@@ -66,7 +63,7 @@ end
 
         end
 
-        position=product_of_place_fields.*(exp(-bin_width*sum_of_place_fields)); %bin width is one therfore denom is 1  ;
+        position=product_of_place_fields.*(exp(-bin_width*sum_of_place_fields)); 
         %position=position./(sum(position,2)*ones(1,length(position_bins)));
  end
  
