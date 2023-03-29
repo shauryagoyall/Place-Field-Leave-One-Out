@@ -27,6 +27,7 @@ good_place_cells=place_fields_BAYESIAN.good_place_cells;
 for track_id=1:2
     for temp =1:length(place_fields_BAYESIAN.track(track_id).raw)
         out(track_id,temp).decoded_replay=[];
+        out(track_id,temp).spike_times=[];
     end
     
     for j=1:length(significant_replay_events.track(track_id).spikes) %number of replay events
@@ -47,6 +48,7 @@ for track_id=1:2
                     event_spike_id(index)=[];  %remove spike times for the cell analyzed
                     event_spike_times(index)=[];%remove spike times for the cell analyzed
                     left_spike_id = cell_id; %the cell id that was ignored
+                    left_spike_times=cell_spike_times;
                     
                     t = significant_replay_events.time_bin_edges; %time array for analysis
                     bin_width=.02; % 20ms bin size for replay
@@ -56,7 +58,8 @@ for track_id=1:2
                     
                     decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,event_spike_times,event_spike_id,position_bins,good_place_cells);
                     out(track_id,left_spike_id).decoded_replay=[out(track_id, left_spike_id).decoded_replay decoded(track_id)];
-
+                    out(track_id,left_spike_id).spike_times=[out(track_id,left_spike_id).spike_times left_spike_times'];
+                    
 %            %%%%% TO PLOT THE CELLS         
 %                     for track_num=1:2
 %                         place_fields=decoded(track_num).place_fields;
