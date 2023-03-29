@@ -2,7 +2,7 @@
 
 clear;
 clc;
-close all;
+%close all;
 
 import decoding.calculate_estimated_position
 
@@ -27,7 +27,7 @@ good_place_cells=place_fields_BAYESIAN.good_place_cells;
 for track_id=1:2
     for temp =1:length(place_fields_BAYESIAN.track(track_id).raw)
         out(track_id,temp).decoded_replay=[];
-        out(track_id,temp).spike_times=[];
+        %out(track_id,temp).spike_times=[];
     end
     
     for j=1:length(significant_replay_events.track(track_id).spikes) %number of replay events
@@ -52,13 +52,14 @@ for track_id=1:2
                     
                     t = significant_replay_events.time_bin_edges; %time array for analysis
                     bin_width=.02; % 20ms bin size for replay
-                    %t0=t(1):bin_width:(t(end)-bin_width); %the start and end time of replay
-                    t0 = significant_replay_events.track(track_id).event_times(j)-.1:bin_width:significant_replay_events.track(track_id).event_times(j)+.1;
+                    %the start and end time of replay
+                    t0 = spike_times(1)-.05:bin_width:spike_times(end)+.05;
                     position_bins=place_fields_BAYESIAN.track(track_id).x_bin_centres; %20 from 0 to 200
-                    
-                    decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,event_spike_times,event_spike_id,position_bins,good_place_cells);
+                    %t0=significant_replay_events.track(track_id).time_edges{1,j};
+                    %t0=significant_replay_events.track(track_id).time_edges{1,j}(1,1):bin_width:significant_replay_events.track(track_id).time_edges{1,j}(1,end);
+                    decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,event_spike_times,event_spike_id,position_bins,good_place_cells,left_spike_times);
                     out(track_id,left_spike_id).decoded_replay=[out(track_id, left_spike_id).decoded_replay decoded(track_id)];
-                    out(track_id,left_spike_id).spike_times=[out(track_id,left_spike_id).spike_times left_spike_times'];
+                    %out(track_id,left_spike_id).spike_times=[out(track_id,left_spike_id).spike_times left_spike_times'];
                     
 %            %%%%% TO PLOT THE CELLS         
 %                     for track_num=1:2
@@ -74,7 +75,7 @@ for track_id=1:2
 %                         % plot(t,estimated_position_interp_actual,'r','LineWidth',2)
 %                         plot(t0,decoded(track_num).estimated_position,'r','LineWidth',2)
 %                         %plot(t,estimated_position_interp,'r','LineWidth',2)
-%                         title(['Bayesian decoding- Neuron' num2str(left_spike_id) ' left out all neruon'])
+%                         title(['Neuron' num2str(left_spike_id) ' left out'])
 %                         ylabel('Position (normalized)')
 %                         xlabel('Time(s)')
 %                         colorbar
@@ -103,14 +104,13 @@ for track_id=1:2
 %                         colormap(hot);
 %                         title("All in event")
 %                                          
+%                     
+%                     %plot the neurons that are skipped here to get a sanity check
+%                     %left_out_spike_times = cell_spike_times;
+%                     %left_out_spike_position = place field of that cell;
+%                     %plot(left_out_spike_times,left_out_spike_position,'r.','linewidth',1000);
 %                     end
-                    %plot the neurons that are skipped here to get a sanity check
-                    %left_out_spike_times = cell_spike_times;
-                    %left_out_spike_position = place field of that cell;
-                    %plot(left_out_spike_times,left_out_spike_position,'r.','linewidth',1000);
-                    
-                    
-                    
+
                 end
             end
         end
@@ -118,4 +118,4 @@ for track_id=1:2
   %out = cell_decoded.decoded_replay;  
 end
 
-save('decoded_replay','out')
+save('decoded_replay_new','out')

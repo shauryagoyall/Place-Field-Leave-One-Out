@@ -1,6 +1,6 @@
 %Bayesian decoding 
 %function [position,estimated_position_time,estimated_position_interp, estimated_position]=calculate_estimated_position(t,t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells)
-function decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells)
+function decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN,spike_times,spike_id,position_bins,good_place_cells,left_spike_times)
     
   for track_id = 1:2
         for j=1:length(place_fields_BAYESIAN.track(track_id).raw) %number of place cells on track
@@ -30,6 +30,8 @@ function decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN
         decoded(track_id).estimated_position_time=t0+bin_width/2;
         %decoded(track_id).estimated_position_interp=interp1(decoded(track_id).estimated_position_time(index),decoded(track_id).estimated_position(index),t,'linear');
         decoded(track_id).estimated_position_interp=[];
+        decoded(track_id).time_bins = t0;
+        decoded(track_id).spike_times = left_spike_times;
   end
 end
     
