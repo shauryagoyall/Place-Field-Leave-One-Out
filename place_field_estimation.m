@@ -22,7 +22,8 @@ for track_id = 1:2
             %% spikes in position bin
             for k=1:length(left_spike_times) %for each spike time, find the interval it is between and add 1 to the number of spikes in that interval bin
                 for l=1:length(estimated_position_time)
-                    if left_spike_times(k) >= estimated_position_time(l)-0.01 & left_spike_times(k) <estimated_position_time(l)+0.01 
+                    %if left_spike_times(k) >= estimated_position_time(l)-0.01 & left_spike_times(k) <estimated_position_time(l)+0.01
+                    if left_spike_times(k) >= estimated_position_time(l) & left_spike_times(k) <estimated_position_time(l+1)
                         ind = find(position_bins==decoded_replay(j).estimated_position(l));
                         spikes_in_position_bin(ind) = spikes_in_position_bin(ind) + 1 ;
                     end
@@ -66,11 +67,17 @@ for track_id = 1:2
             frequency(i) = 10*spikes_in_position_bin(i)/time_in_position_bin(i); %10 as time interval is 0.1s
         end
         subplot(3,1,3);
-        plot(position_bins,frequency)
-        xticks(position_bins)
-        xlabel("Estimated Position")
-        ylabel("Firing Frequency")
-        title("Estimated Place field")
+        hold on;
+        plot(position_bins,frequency);
+        %if max(decoded_replay(1).place_fields{1, cell_id}{1, 1}) ~= 0
+        actual_place = rescale(decoded_replay(1).place_fields{1, cell_id}{1, 1},0,max(frequency) );
+        plot(position_bins, actual_place ,'r' ); 
+       % end
+        xticks(position_bins);
+        xlabel("Estimated Position");
+        ylabel("Firing Frequency");
+        title("Estimated Place field");
+        hold off;
         
     end
     
