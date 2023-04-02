@@ -1,6 +1,6 @@
 clear;
 clc;
-load('decoded_replay_new.mat')
+load('decoded_replay.mat')
 load('extracted_place_fields_BAYESIAN.mat')
 good_place_cells=place_fields_BAYESIAN.good_place_cells;
 
@@ -22,10 +22,12 @@ for track_id = 1:2
             %% spikes in position bin
             for k=1:length(left_spike_times) %for each spike time, find the interval it is between and add 1 to the number of spikes in that interval bin
                 for l=1:length(estimated_position_time)
-                    %if left_spike_times(k) >= estimated_position_time(l)-0.01 & left_spike_times(k) <estimated_position_time(l)+0.01
-                    if left_spike_times(k) >= estimated_position_time(l) & left_spike_times(k) <estimated_position_time(l+1)
-                        ind = find(position_bins==decoded_replay(j).estimated_position(l));
-                        spikes_in_position_bin(ind) = spikes_in_position_bin(ind) + 1 ;
+                    if left_spike_times(k) >= estimated_position_time(l)-0.01 & left_spike_times(k) <estimated_position_time(l)+0.01
+                    %if left_spike_times(k) >= estimated_position_time(l) & left_spike_times(k) <estimated_position_time(l+1)
+                       if decoded_replay(j).include_bin(l) ~= 0  
+                            ind = find(position_bins==decoded_replay(j).estimated_position(l));
+                            spikes_in_position_bin(ind) = spikes_in_position_bin(ind) + 1 ;
+                       end
                     end
                 end
             end
@@ -45,7 +47,13 @@ for track_id = 1:2
                 time_in_position_bin(position_index) = time_in_position_bin(position_index) + 1;
             end
         end
-        %% Spikes in a position bin
+
+        %% Place Field
+        for i=1:length(position_bins)
+            frequency(i) = 10*spikes_in_position_bin(i)/time_in_position_bin(i); %10 as time interval is 0.1s
+        end
+        
+        %% Plots
         figure;
         subplot(3,1,1);
         bar(position_bins,spikes_in_position_bin)
@@ -54,18 +62,13 @@ for track_id = 1:2
         ylabel("Number of Spikes")
         title("Number of spikes in a position bin")
 
-        %% Time in a position bin
         subplot(3,1,2);
         bar(position_bins,time_in_position_bin)
         xticks(position_bins)
         xlabel("Estimated Position")
         ylabel("Time spent")
         title("Time in a position bin")
-
-        %% Place Field
-        for i=1:length(position_bins)
-            frequency(i) = 10*spikes_in_position_bin(i)/time_in_position_bin(i); %10 as time interval is 0.1s
-        end
+        
         subplot(3,1,3);
         hold on;
         plot(position_bins,frequency);

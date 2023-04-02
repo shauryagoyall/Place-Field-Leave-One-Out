@@ -118,4 +118,4 @@ for track_id=1:2
   %out = cell_decoded.decoded_replay;  
 end
 
-save('decoded_replay_new','out')
+save('decoded_replay','out')

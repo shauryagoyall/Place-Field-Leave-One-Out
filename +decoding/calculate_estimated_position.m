@@ -7,12 +7,13 @@ function decoded=calculate_estimated_position(t0,bin_width,place_fields_BAYESIAN
             decoded(track_id).place_fields{j}=place_fields_BAYESIAN.track(track_id).raw(j);
         end
       place_fields(track_id,:)=decoded(track_id).place_fields(:,good_place_cells);   
+      decoded(track_id).include_bin = zeros(1,length(t0));
   end    
         
         
   for j=1:length(t0)
             for track_id = 1:2
-                temp_position(track_id,:)=reconstruct(t0(j),bin_width,place_fields(track_id,:),spike_times,spike_id,position_bins,good_place_cells)';
+                [temp_position(track_id,:),decoded(track_id).include_bin(j)]=reconstruct(t0(j),bin_width,place_fields(track_id,:),spike_times,spike_id,position_bins,good_place_cells);
             end
             temp_position = renormalize(temp_position, position_bins);
             for track_id = 1:2
@@ -37,7 +38,7 @@ end
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
- function position=reconstruct(t0,bin_width,place_field,spike_times,spike_id,position_bins,good_place_cells)
+ function [position,total_spike_count]=reconstruct(t0,bin_width,place_field,spike_times,spike_id,position_bins,good_place_cells)
         global parameters
         t1=t0+bin_width;
         total_spike_count=0;
