@@ -2,19 +2,21 @@ clear;
 clc;
 load('decoded_replay_sleep.mat') %%change sleep to awake for awake replay
 load('extracted_place_fields_BAYESIAN.mat')
-load('replay_counts.mat')
+load('replay_counts_sleep.mat')
 
 for track_id = 1:2
     relevant_decoded = out(track_id,:);
-    good_place_cells=replay_counts(track_id).cell_id  ;
-    relevant_decoded = relevant_decoded(good_place_cells);
+    sorted_place_cells=replay_counts(track_id).cell_id  ;
+    relevant_decoded = relevant_decoded(sorted_place_cells);
     position_bins=place_fields_BAYESIAN.track(track_id).x_bin_centres;
     never_replay_cell = [];
-    for i = 70:length(good_place_cells)
+    estimation_error = [];
+    for i = 1:length(sorted_place_cells)
         decoded_replay = relevant_decoded(i).decoded_replay;
-        cell_id = good_place_cells(i);
+        cell_id = sorted_place_cells(i);
         if isempty(decoded_replay)
             never_replay_cell=[never_replay_cell cell_id];
+            estimation_error = [estimation_error 1000];
             continue
         end
         spikes_in_position_bin = zeros(1,length(position_bins));
@@ -59,36 +61,45 @@ for track_id = 1:2
         for t=1:length(position_bins)
             frequency(t) = spikes_in_position_bin(t)/time_in_position_bin(t); %10 as time interval is 0.1s
         end
-          
-%         %% Plots
-        figure;
-        subplot(3,1,1);
-        bar(position_bins,spikes_in_position_bin)
-        xticks(position_bins)
-        xlabel("Estimated Position")
-        ylabel("Number of Spikes")
-        title("Number of spikes in a position bin")
-
-        subplot(3,1,2);
-        bar(position_bins,time_in_position_bin)
-        xticks(position_bins)
-        xlabel("Estimated Position")
-        ylabel("Time spent")
-        title("Time in a position bin")
-        
-        subplot(3,1,3);
-        hold on;
-        plot(position_bins,rescale(frequency,0,1));
+        frequency(isnan(frequency))=0;
+        estimated_place = rescale(frequency,0,1);
         actual_place = rescale(decoded_replay(1).place_fields{1, cell_id}{1, 1},0,1 );
-        plot(position_bins, actual_place ,'r' ); 
-        xticks(position_bins);
-        xlabel("Estimated Position");
-        ylabel("Firing Frequency");
-        title("Estimated Place field "+num2str(cell_id));
-        legend("Estimated","Actual");
-        hold off;
+
+        error = rmse(estimated_place, actual_place);
+        estimation_error = [estimation_error error];
+
+% %         %% Plots
+%         figure;
+%         subplot(3,1,1);
+%         bar(position_bins,spikes_in_position_bin)
+%         xticks(position_bins)
+%         xlabel("Estimated Position")
+%         ylabel("Number of Spikes")
+%         title("Number of spikes in a position bin")
+% 
+%         subplot(3,1,2);
+%         bar(position_bins,time_in_position_bin)
+%         xticks(position_bins)
+%         xlabel("Estimated Position")
+%         ylabel("Time spent")
+%         title("Time in a position bin")
+% 
+%         subplot(3,1,3);
+%         hold on;
+% 
+%         plot(position_bins,estimated_place);
+%         plot(position_bins, actual_place ,'r' ); 
+%         xticks(position_bins);
+%         xlabel("Estimated Position");
+%         ylabel("Firing Frequency");
+%         title("Estimated Place field "+num2str(cell_id) + 'Error'+str(error));
+%         legend("Estimated","Actual");
+%         hold off;
          
     end%%% put a flag here and run in debug mode to see each plot one by one
-    disp("The cells that never replayed are"+ num2str(never_replay_cell))
+
+    replay_counts(track_id).error = estimation_error;
+%    disp("The cells that never replayed are"+ num2str(never_replay_cell))
 end
 
+save('replay_counts_sleep.mat',"replay_counts");
