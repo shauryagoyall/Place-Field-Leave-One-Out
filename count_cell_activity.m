@@ -49,6 +49,16 @@ for track_id = 1:length(significant_replay_events.track)
         end
     end
 
+    %print most active cells by event
+    [sorted_events, sorted_indices] = sort(event_counts(track_id,:), 'descend');
+    for i = 1:length(spike_counts(track_id,:))
+        cell_number = sorted_indices(i);
+        event_count = sorted_events(i);
+        if event_count ~= 0
+            fprintf('Cell %d: Events %d\n', cell_number, event_count);
+        end
+    end
+
     %print most active cells by spike
     cell_id = 1:length(spike_counts);
     [sorted_spikes, sorted_indices] = sort(spike_counts(track_id,:), 'descend');
@@ -60,16 +70,11 @@ for track_id = 1:length(significant_replay_events.track)
         end
     end
 
-    %print most active cells by event
-    [sorted_events, sorted_indices] = sort(event_counts(track_id,:), 'descend');
-    for i = 1:length(spike_counts(track_id,:))
-        cell_number = sorted_indices(i);
-        event_count = sorted_events(i);
-        if event_count ~= 0
-            fprintf('Cell %d: Events %d\n', cell_number, event_count);
-        end
-    end
+    event_counts_this_track = event_counts(track_id,:);
 
-
+    replay_counts(track_id).spike_count = sorted_spikes;
+    replay_counts(track_id).cell_id = sorted_indices;
+    replay_counts(track_id).event_counts = event_counts_this_track(sorted_indices);
 end
 
+save('replay_counts.mat', 'replay_counts');

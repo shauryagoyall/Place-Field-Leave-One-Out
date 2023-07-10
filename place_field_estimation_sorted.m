@@ -6,11 +6,11 @@ load('replay_counts.mat')
 
 for track_id = 1:2
     relevant_decoded = out(track_id,:);
-    good_place_cells=place_fields_BAYESIAN.track(track_id).good_cells  ;
+    good_place_cells=replay_counts(track_id).cell_id  ;
     relevant_decoded = relevant_decoded(good_place_cells);
     position_bins=place_fields_BAYESIAN.track(track_id).x_bin_centres;
     never_replay_cell = [];
-    for i = 1:length(good_place_cells)
+    for i = 70:length(good_place_cells)
         decoded_replay = relevant_decoded(i).decoded_replay;
         cell_id = good_place_cells(i);
         if isempty(decoded_replay)
