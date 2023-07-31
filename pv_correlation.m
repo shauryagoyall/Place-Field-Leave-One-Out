@@ -29,7 +29,7 @@ for track_id = 1:length(place_field_laps)
 end
 
 correlated_values = place_field_laps;
-for track_id = 1:length(place_field_laps)
+for track_id = 3:length(place_field_laps)
     fieldNames = fieldnames(place_field_laps(track_id));
     for i = 1:numel(fieldNames)-1
        lap_id = fieldNames{i} ;  % Get the current field name
@@ -41,7 +41,7 @@ for track_id = 1:length(place_field_laps)
        if ~isempty(next_lap_population)
            for j = 1:size(current_lap_population,2)
                corr_matrix = corrcoef(current_lap_population(:,j),next_lap_population(:,j));
-               lap_correlation(1,j) = corr_matrix(1, 2);
+               lap_correlation(1,j) = min( corr_matrix(1, 2), 1);
            end
        else
            correlated_values(track_id).(lap_id) = [];
